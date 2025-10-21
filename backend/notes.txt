@@ -1,0 +1,3 @@
+folder to house the backend. 
+we will have raspberry pi nodes to track car number.
+this number will be processed by a flask application

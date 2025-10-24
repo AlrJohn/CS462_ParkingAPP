@@ -1,0 +1,10 @@
+Only for Mac.
+download xcode
+instasll exop 'npm install --global expo-cli'
+cd into mobile and run 'npm start ios'
+    this should open an IOS simulator using xcode
+
+to run on an iphone
+download expo go on your iphone
+cd into mobile and run 'npm start ios'
+scan the QR code in the terminal with your phone

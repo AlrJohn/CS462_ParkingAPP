@@ -1,107 +1,176 @@
-#Start - Test python file
+# Backend Flask API for Parking App
+# Penn State Abington - CMPSC 462 Final Project
 
-# backend/app.py
 from flask import Flask, request, jsonify
-import sqlite3
-from datetime import datetime
+import json
+import os
+from datetime import datetime, time
+import threading
+import time as time_module
 
 app = Flask(__name__)
-DB = "backend/parking.db"
+
+# File path for parking data persistence
+PARKING_DATA_FILE = "parking_data.json"
+
+# Initialize parking lots dictionary (13 lots: A through M, each with 100 available spaces)
+parking_lots = {
+    "A": 100, "B": 100, "C": 100, "D": 100, "E": 100, "F": 100, "G": 100,
+    "H": 100, "I": 100, "J": 100, "K": 100, "L": 100, "M": 100
+}
 
 # -------------------------------
-# Initialize database
+# Data Persistence Functions
 # -------------------------------
-def init_db():
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS lots (
-            lot_id TEXT PRIMARY KEY,
-            capacity INTEGER,
-            current_count INTEGER
-        )
-    """)
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            lot_id TEXT,
-            event_type TEXT,
-            timestamp TEXT
-        )
-    """)
-    # Create one example parking lot
-    c.execute("INSERT OR IGNORE INTO lots (lot_id, capacity, current_count) VALUES (?, ?, ?)",
-              ("A", 10, 0))
-    conn.commit()
-    conn.close()
 
-
-# -------------------------------
-# Routes
-# -------------------------------
-@app.route("/update", methods=["POST"])
-def update_lot():
-    """Called when a car enters or exits."""
-    data = request.get_json()
-    lot_id = data.get("lot_id")
-    event_type = data.get("event_type")  # "in" or "out"
-
-    if not lot_id or event_type not in ("in", "out"):
-        return jsonify({"error": "Invalid request"}), 400
-
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-
-    # Record the event
-    c.execute("INSERT INTO events (lot_id, event_type, timestamp) VALUES (?, ?, ?)",
-              (lot_id, event_type, datetime.utcnow().isoformat()))
-
-    # Update count
-    if event_type == "in":
-        c.execute("UPDATE lots SET current_count = current_count + 1 WHERE lot_id = ?", (lot_id,))
+def load_parking_data():
+    """Load parking lot data from JSON file on startup."""
+    global parking_lots
+    if os.path.exists(PARKING_DATA_FILE):
+        try:
+            with open(PARKING_DATA_FILE, 'r') as f:
+                data = json.load(f)
+                # Validate that all lots A-M exist and have valid values
+                for lot in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"]:
+                    if lot in data and 0 <= data[lot] <= 100:
+                        parking_lots[lot] = data[lot]
+                    else:
+                        parking_lots[lot] = 100  # Default to 100 if invalid data
+            print(f"Loaded parking data: {parking_lots}")
+        except (json.JSONDecodeError, FileNotFoundError):
+            print("Invalid or missing parking data file. Using default values.")
     else:
-        c.execute("""
-            UPDATE lots
-            SET current_count = CASE WHEN current_count > 0 THEN current_count - 1 ELSE 0 END
-            WHERE lot_id = ?
-        """, (lot_id,))
+        print("No parking data file found. Using default values (all lots at 100).")
 
-    conn.commit()
-    # Return current status
-    row = c.execute("SELECT capacity, current_count FROM lots WHERE lot_id = ?", (lot_id,)).fetchone()
-    conn.close()
+def save_parking_data():
+    """Save current parking lot data to JSON file."""
+    try:
+        with open(PARKING_DATA_FILE, 'w') as f:
+            json.dump(parking_lots, f, indent=2)
+        print(f"Saved parking data: {parking_lots}")
+    except Exception as e:
+        print(f"Error saving parking data: {e}")
 
-    if row:
-        cap, count = row
-        occupancy = round((count / cap) * 100, 1)
-        return jsonify({"lot_id": lot_id, "capacity": cap, "current_count": count, "occupancy_pct": occupancy})
-    else:
-        return jsonify({"error": "Lot not found"}), 404
+def reset_daily_data():
+    """Reset all parking lots to 100 available spaces (daily reset at 6 AM)."""
+    global parking_lots
+    for lot in parking_lots:
+        parking_lots[lot] = 100
+    save_parking_data()
+    print("Daily reset completed: All lots reset to 100 available spaces")
 
+def daily_reset_scheduler():
+    """Background thread to check for 6 AM daily reset."""
+    while True:
+        now = datetime.now()
+        # Check if it's 6 AM
+        if now.hour == 6 and now.minute == 0:
+            reset_daily_data()
+            # Sleep for 1 minute to avoid multiple resets
+            time_module.sleep(60)
+        else:
+            # Check every minute
+            time_module.sleep(60)
 
-@app.route("/status", methods=["GET"])
-def get_status():
-    """Get all parking lot data."""
-    conn = sqlite3.connect(DB)
-    c = conn.cursor()
-    rows = c.execute("SELECT lot_id, capacity, current_count FROM lots").fetchall()
-    conn.close()
+# -------------------------------
+# API Endpoints
+# -------------------------------
 
-    lots = []
-    for lot_id, cap, cur in rows:
-        lots.append({
-            "lot_id": lot_id,
-            "capacity": cap,
-            "current_count": cur,
-            "occupancy_pct": round((cur / cap) * 100, 1)
+@app.route("/updateLotCount", methods=["POST"])
+def update_lot_count():
+    """Update parking lot count when a car enters or exits."""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        lot = data.get("lot")
+        delta = data.get("delta")
+        
+        # Validate input
+        if not lot or lot not in parking_lots:
+            return jsonify({"error": f"Invalid lot. Must be one of: {list(parking_lots.keys())}"}), 400
+        
+        if delta is None or not isinstance(delta, int):
+            return jsonify({"error": "Invalid delta. Must be an integer (-1 for car entering, +1 for car exiting)"}), 400
+        
+        if delta not in [-1, 1]:
+            return jsonify({"error": "Delta must be -1 (car entering) or +1 (car exiting)"}), 400
+        
+        # Update available spaces
+        current_spaces = parking_lots[lot]
+        new_spaces = current_spaces + delta
+        
+        # Ensure spaces stay within valid range (0-100)
+        if new_spaces < 0:
+            new_spaces = 0
+        elif new_spaces > 100:
+            new_spaces = 100
+        
+        parking_lots[lot] = new_spaces
+        
+        # Save to file
+        save_parking_data()
+        
+        # Calculate occupancy percentage
+        occupied_spaces = 100 - new_spaces
+        occupancy_pct = round((occupied_spaces / 100) * 100, 1)
+        
+        # Return updated lot information
+        return jsonify({
+            "lot": lot,
+            "available_spaces": new_spaces,
+            "capacity": 100,
+            "occupied_spaces": occupied_spaces,
+            "occupancy_pct": occupancy_pct,
+            "action": "car_entered" if delta == -1 else "car_exited"
         })
+        
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
-    return jsonify(lots)
+@app.route("/getLotCount", methods=["GET"])
+def get_lot_count():
+    """Get occupancy information for all parking lots."""
+    try:
+        lots_data = []
+        
+        for lot, available_spaces in parking_lots.items():
+            occupied_spaces = 100 - available_spaces
+            occupancy_pct = round((occupied_spaces / 100) * 100, 1)
+            
+            lots_data.append({
+                "lot": lot,
+                "available_spaces": available_spaces,
+                "capacity": 100,
+                "occupied_spaces": occupied_spaces,
+                "occupancy_pct": occupancy_pct
+            })
+        
+        return jsonify(lots_data)
+        
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 
 
 # -------------------------------
-# Run app
+# Initialize and Run App
 # -------------------------------
+
 if __name__ == "__main__":
-    init_db()
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    # Load existing data on startup
+    load_parking_data()
+    
+    # Start daily reset scheduler in background thread
+    reset_thread = threading.Thread(target=daily_reset_scheduler, daemon=True)
+    reset_thread.start()
+    
+    print("Starting Parking App Backend...")
+    print(f"Available lots: {list(parking_lots.keys())}")
+    print("Endpoints:")
+    print("  POST /updateLotCount - Update lot count")
+    print("  GET /getLotCount - Get all lot data")
+    
+    app.run(host="0.0.0.0", port=5002, debug=True)

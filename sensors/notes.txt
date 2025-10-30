@@ -1,0 +1,8 @@
+this folder should hold the code for each sensor we want to test/use
+
+for example we should have an "ultrasonic sensor" folder to store the files needed to track a parking lot enterance way with an ultrasonic sensor.
+
+POTENTIAL SENSORS:
+    Ultrasonic Sensors
+    IR Break Beams
+    Camera

@@ -1,1 +1,0 @@
-mobile application for UI, should integrate with navigation apps to provide user with directions to desired parking lot.

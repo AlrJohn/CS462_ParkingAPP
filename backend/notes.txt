@@ -1,3 +1,21 @@
 folder to house the backend. 
 we will have raspberry pi nodes to track car number.
 this number will be processed by a flask application
+
+For testing this program, go to  /backend and type python app.py to start the server
+
+For testing car entering Lot:   
+curl -X POST http://localhost:5001/updateLotCount \
+     -H "Content-Type: application/json" \
+     -d '{"lot": "A", "delta": -1}'
+
+For testing car exiting Lot: 
+   curl -X POST http://localhost:5001/updateLotCount \
+     -H "Content-Type: application/json" \
+     -d '{"lot": "A", "delta": 1}'
+
+
+For getting all data:
+   curl http://localhost:5001/getLotCount
+   ```
+

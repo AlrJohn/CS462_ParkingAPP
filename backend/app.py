@@ -3,20 +3,21 @@
 
 from flask import Flask, request, jsonify
 import json
+from flask_cors import CORS
 import os
 from datetime import datetime, time
 import threading
 import time as time_module
 
 app = Flask(__name__)
+CORS(app)
 
 # File path for parking data persistence
 PARKING_DATA_FILE = "parking_data.json"
 
 # Initialize parking lots dictionary (13 lots: A through M, each with 100 available spaces)
 parking_lots = {
-    "A": 100, "B": 100, "C": 100, "D": 100, "E": 100, "F": 100, "G": 100,
-    "H": 100, "I": 100, "J": 100, "K": 100, "L": 100, "M": 100
+    "A": 100, "B": 100, "C": 100, "D": 100
 }
 
 # -------------------------------

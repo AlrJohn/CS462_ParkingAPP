@@ -2,24 +2,32 @@
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 30, 68, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .parking-lot-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 30, 68, 0.15);
+}
+
+.parking-lot-card:focus {
+  outline: 3px solid #001E44;
+  outline-offset: 2px;
+  border-color: #1E407C;
 }
 
 .lot-name {
-  color: #1f2937;
+  color: #0B2141;
   font-size: 1.25rem;
   font-weight: 600;
   text-align: center;
+  margin: 0;
 }
 
 .occupancy-circle {
@@ -30,19 +38,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f9fafb;
+  background: #FFFFFF;
+  transition: border-color 0.3s ease;
 }
 
 .occupancy-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #0B2141;
 }
 
 .occupancy-label {
-  color: #6b7280;
+  color: #0B2141;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }

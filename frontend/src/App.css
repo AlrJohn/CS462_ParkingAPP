@@ -8,43 +8,218 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #E9EEF3;
   min-height: 100vh;
+  color: #0B2141;
 }
 
 .app {
   min-height: 100vh;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header {
-  text-align: center;
-  margin-bottom: 40px;
-  padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #001E44;
+  color: #FFFFFF;
+  padding: 16px 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.app-header h1 {
-  color: white;
-  font-size: 2.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.psu-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  height: 40px;
+  width: 60px;
+  background: #1E407C;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.app-title {
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.app-main {
+  margin-top: 72px;
+  padding: 20px;
+  flex: 1;
+}
+
+.main-title {
+  text-align: center;
+  color: #0B2141;
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 20px auto 40px;
+  max-width: 1400px;
+}
+
+.legend-container {
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
+  color: #0B2141;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.legend-color.green {
+  background: #22c55e;
+}
+
+.legend-color.yellow {
+  background: #f59e0b;
+}
+
+.legend-color.red {
+  background: #ef4444;
+}
+
+.legend-separator {
+  color: #1E407C;
+  font-weight: bold;
 }
 
 .parking-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-@media (max-width: 768px) {
+.timestamp {
+  text-align: center;
+  color: #0B2141;
+  font-size: 0.875rem;
+  margin-top: 24px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #0B2141;
+  font-size: 1.125rem;
+  background: white;
+  border-radius: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 769px) and (max-width: 1024px) {
   .parking-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .app-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 768px) {
+  .app-main {
+    margin-top: 60px;
+    padding: 16px;
+  }
+
+  .parking-grid {
+    grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .app-header h1 {
-    font-size: 2rem;
+  .header-content {
+    gap: 12px;
+  }
+
+  .app-title {
+    font-size: 1rem;
+  }
+
+  .psu-logo {
+    height: 32px;
+  }
+
+  .logo-placeholder {
+    height: 32px;
+    width: 50px;
+    font-size: 0.875rem;
+  }
+
+  .legend {
+    font-size: 0.75rem;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
   }
 }

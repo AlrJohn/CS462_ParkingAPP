@@ -1,0 +1,97 @@
+.campus-map-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1400px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.map-title {
+  color: #0B2141;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.map-toggle-button {
+  display: none; /* Hidden on desktop */
+  background: #001E44;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.map-toggle-button:hover {
+  background: #1E407C;
+}
+
+.map-toggle-button:focus {
+  outline: 2px solid #001E44;
+  outline-offset: 2px;
+}
+
+.map-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.map-content.expanded {
+  max-height: 500px;
+}
+
+.map-content.collapsed {
+  max-height: 0;
+}
+
+.map-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #E9EEF3;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.campus-map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.map-marker {
+  transition: fill 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.map-marker:hover {
+  transform: scale(1.2);
+}
+
+/* Mobile: Show toggle button and make collapsible */
+@media (max-width: 768px) {
+  .map-toggle-button {
+    display: block;
+  }
+
+  .map-content.collapsed {
+    max-height: 0;
+  }
+
+  .map-content.expanded {
+    max-height: 400px;
+  }
+}
+

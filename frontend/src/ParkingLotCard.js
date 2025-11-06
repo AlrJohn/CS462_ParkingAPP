@@ -1,23 +1,33 @@
 import React from 'react';
+import { COLORS, OCCUPANCY_THRESHOLDS } from './constants';
 import './ParkingLotCard.css';
 
-function ParkingLotCard({ lotName, occupancy }) {
+function ParkingLotCard({ lot, occupancy }) {
   const getOccupancyColor = (occupancy) => {
-    if (occupancy >= 90) return '#ef4444';
-    if (occupancy >= 70) return '#f59e0b';
-    return '#22c55e';
+    if (occupancy <= OCCUPANCY_THRESHOLDS.GREEN_MAX) return COLORS.GREEN;
+    if (occupancy <= OCCUPANCY_THRESHOLDS.YELLOW_MAX) return COLORS.YELLOW;
+    return COLORS.RED;
   };
 
+  const lotId = lot || 'Unknown';
+  const occupancyValue = Math.round(occupancy || 0);
+
   return (
-    <div className="parking-lot-card">
-      <h2 className="lot-name">{lotName}</h2>
+    <div
+      className="parking-lot-card"
+      role="article"
+      aria-label={`Student Parking Lot ${lotId}: ${occupancyValue}% occupied`}
+      tabIndex={0}
+    >
+      <h2 className="lot-name">Student Parking Lot {lotId}</h2>
       <div
         className="occupancy-circle"
-        style={{ borderColor: getOccupancyColor(occupancy) }}
+        style={{ borderColor: getOccupancyColor(occupancyValue) }}
+        aria-label={`Occupancy: ${occupancyValue}%`}
       >
-        <span className="occupancy-value">{occupancy}%</span>
+        <span className="occupancy-value">{occupancyValue}%</span>
       </div>
-      <div className="occupancy-label">Occupied</div>
+      <div className="occupancy-label">OCCUPIED</div>
     </div>
   );
 }

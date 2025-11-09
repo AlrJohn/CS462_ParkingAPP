@@ -24,6 +24,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
+    "https://cs-462-parking-app.vercel.app",
     # Add your production frontend URL here when deployed
     # "https://your-frontend-domain.com"
 ]

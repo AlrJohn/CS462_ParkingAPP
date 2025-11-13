@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: cs462-parking-backend
+    env: python
+    region: oregon
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
+    rootDir: backend

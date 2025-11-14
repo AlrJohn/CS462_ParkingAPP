@@ -169,18 +169,72 @@ def update_lot_count():
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+@app.route("/setLotOccupancy", methods=["POST"])
+@require_api_key
+def set_lot_occupancy():
+    """Set parking lot occupancy based on absolute count (for camera sensors)."""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        lot = data.get("lot")
+        occupied_count = data.get("occupied_count")
+
+        # Validate input
+        if not lot or lot not in parking_lots:
+            return jsonify({"error": f"Invalid lot. Must be one of: {list(parking_lots.keys())}"}), 400
+
+        if occupied_count is None or not isinstance(occupied_count, int):
+            return jsonify({"error": "Invalid occupied_count. Must be an integer."}), 400
+
+        if occupied_count < 0:
+            return jsonify({"error": "occupied_count cannot be negative"}), 400
+
+        capacity = lot_capacities[lot]
+
+        # Ensure occupied count doesn't exceed capacity
+        if occupied_count > capacity:
+            occupied_count = capacity
+
+        # Calculate available spaces (capacity - occupied)
+        new_available_spaces = capacity - occupied_count
+
+        # Update parking lot
+        parking_lots[lot] = new_available_spaces
+
+        # Save to file
+        save_parking_data()
+
+        # Calculate occupancy percentage
+        occupancy_pct = round((occupied_count / capacity) * 100, 1)
+
+        # Return updated lot information
+        return jsonify({
+            "lot": lot,
+            "available_spaces": new_available_spaces,
+            "capacity": capacity,
+            "occupied_spaces": occupied_count,
+            "occupancy_pct": occupancy_pct,
+            "message": f"Lot {lot} updated with {occupied_count} occupied spots"
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 @app.route("/getLotCount", methods=["GET"])
 @require_api_key
 def get_lot_count():
     """Get occupancy information for all parking lots."""
     try:
         lots_data = []
-        
+
         for lot, available_spaces in parking_lots.items():
             capacity = lot_capacities[lot]
             occupied_spaces = capacity - available_spaces
             occupancy_pct = round((occupied_spaces / capacity) * 100, 1)
-            
+
             lots_data.append({
                 "lot": lot,
                 "available_spaces": available_spaces,
@@ -188,9 +242,9 @@ def get_lot_count():
                 "occupied_spaces": occupied_spaces,
                 "occupancy_pct": occupancy_pct
             })
-        
+
         return jsonify(lots_data)
-        
+
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
@@ -214,6 +268,7 @@ if __name__ == "__main__":
     print(f"CORS enabled for origins: {ALLOWED_ORIGINS}")
     print("Endpoints:")
     print("  POST /updateLotCount - Update lot count (requires API key)")
+    print("  POST /setLotOccupancy - Set lot occupancy by count (requires API key)")
     print("  GET /getLotCount - Get all lot data (requires API key)")
     print(f"Server running on {HOST}:{PORT}")
     

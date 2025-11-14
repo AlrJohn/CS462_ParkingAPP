@@ -1,10 +1,13 @@
+/* Note: CSS cannot directly import JS constants, so values here match constants.js */
+/* Colors: Nittany Navy #001E44, Beaver Blue #1E407C, White #FFFFFF, Light Gray #E9EEF3, Text #0B2141 */
+
 .campus-map-section {
-  background: white;
+  background: #FFFFFF;
   border-radius: 12px;
   padding: 20px;
-  margin: 20px auto;
-  max-width: 1400px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 30, 68, 0.1);
+  flex: 0 0 400px;
+  min-width: 0;
 }
 
 .map-header {
@@ -24,14 +27,16 @@
 .map-toggle-button {
   display: none; /* Hidden on desktop */
   background: #001E44;
-  color: white;
+  color: #FFFFFF;
   border: none;
   border-radius: 4px;
   width: 32px;
   height: 32px;
   font-size: 20px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
+  align-items: center;
+  justify-content: center;
 }
 
 .map-toggle-button:hover {
@@ -80,10 +85,24 @@
   transform: scale(1.2);
 }
 
+/* Tablet: Stack layout */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .campus-map-section {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
 /* Mobile: Show toggle button and make collapsible */
 @media (max-width: 768px) {
+  .campus-map-section {
+    flex: 1 1 100%;
+    width: 100%;
+    margin: 0;
+  }
+
   .map-toggle-button {
-    display: block;
+    display: flex;
   }
 
   .map-content.collapsed {
@@ -94,4 +113,3 @@
     max-height: 400px;
   }
 }
-

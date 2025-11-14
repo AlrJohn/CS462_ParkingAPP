@@ -1,3 +1,6 @@
+/* Note: CSS cannot directly import JS constants, so values here match constants.js */
+/* Colors: Nittany Navy #001E44, Beaver Blue #1E407C, White #FFFFFF, Light Gray #E9EEF3, Text #0B2141 */
+
 * {
   margin: 0;
   padding: 0;
@@ -17,6 +20,24 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-image: var(--bg-image-url);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+.app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(233, 238, 243, 0.85);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .app-header {
@@ -37,6 +58,7 @@ body {
   gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
 }
 
 .logo-container {
@@ -46,21 +68,9 @@ body {
 }
 
 .psu-logo {
-  height: 40px;
+  height: 60px;
   width: auto;
   object-fit: contain;
-}
-
-.logo-placeholder {
-  height: 40px;
-  width: 60px;
-  background: #1E407C;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  border-radius: 4px;
 }
 
 .app-title {
@@ -68,28 +78,36 @@ body {
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: 100%;
 }
 
 .app-main {
   margin-top: 72px;
   padding: 20px;
   flex: 1;
+  position: relative;
+  z-index: 1;
 }
 
-.main-title {
-  text-align: center;
-  color: #0B2141;
-  font-size: 2rem;
-  font-weight: 600;
-  margin: 20px auto 40px;
+.parking-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
   max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .legend-container {
   max-width: 1400px;
-  margin: 20px auto;
+  margin: 24px auto 0;
   padding: 0 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .legend {
@@ -98,11 +116,12 @@ body {
   justify-content: center;
   gap: 12px;
   padding: 12px;
-  background: white;
+  background: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-size: 0.875rem;
   color: #0B2141;
+  flex-wrap: wrap;
 }
 
 .legend-item {
@@ -136,45 +155,32 @@ body {
   font-weight: bold;
 }
 
-.parking-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.timestamp {
-  text-align: center;
-  color: #0B2141;
-  font-size: 0.875rem;
-  margin-top: 24px;
-  padding: 12px;
-  background: white;
-  border-radius: 8px;
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .no-data {
   text-align: center;
   padding: 40px;
   color: #0B2141;
   font-size: 1.125rem;
-  background: white;
+  background: #FFFFFF;
   border-radius: 12px;
   max-width: 1400px;
   margin: 0 auto;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
-/* Tablet: 2 columns */
+/* Desktop: ≥1025px - 2×2 grid */
+@media (min-width: 1025px) {
+  .parking-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet: 769-1024px - 2 columns */
 @media (min-width: 769px) and (max-width: 1024px) {
   .parking-grid {
     grid-template-columns: repeat(2, 1fr);
+    width: 100%;
   }
 
   .app-title {
@@ -182,7 +188,7 @@ body {
   }
 }
 
-/* Mobile: 1 column */
+/* Mobile: ≤768px - 1 column */
 @media (max-width: 768px) {
   .app-main {
     margin-top: 60px;
@@ -192,6 +198,8 @@ body {
   .parking-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+    width: 100%;
+    padding: 0;
   }
 
   .header-content {
@@ -200,16 +208,11 @@ body {
 
   .app-title {
     font-size: 1rem;
+    padding: 0 60px;
   }
 
   .psu-logo {
-    height: 32px;
-  }
-
-  .logo-placeholder {
-    height: 32px;
-    width: 50px;
-    font-size: 0.875rem;
+    height: 48px;
   }
 
   .legend {
@@ -221,5 +224,9 @@ body {
   .legend-color {
     width: 12px;
     height: 12px;
+  }
+
+  .app {
+    background-attachment: scroll;
   }
 }

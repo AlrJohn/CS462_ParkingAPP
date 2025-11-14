@@ -9,6 +9,11 @@ function LoadingSkeleton() {
           <div className="skeleton-title"></div>
           <div className="skeleton-circle"></div>
           <div className="skeleton-label"></div>
+          <div className="skeleton-details">
+            <div className="skeleton-detail-item"></div>
+            <div className="skeleton-detail-item"></div>
+          </div>
+          <div className="skeleton-timestamp"></div>
         </div>
       ))}
     </div>

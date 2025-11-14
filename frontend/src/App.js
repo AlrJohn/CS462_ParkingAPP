@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ParkingLotCard from './ParkingLotCard';
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorBanner from './ErrorBanner';
-import { API_URL, API_HEADERS, REFRESH_INTERVAL, ALLOWED_LOTS } from './constants';
+import { API_URL, API_HEADERS, REFRESH_INTERVAL, ALLOWED_LOTS, OCCUPANCY_THRESHOLDS } from './constants';
 import './App.css';
 
 function App() {
@@ -85,6 +85,14 @@ function App() {
   };
 
   useEffect(() => {
+    // Set CSS custom property for background image
+    document.documentElement.style.setProperty(
+      '--bg-image-url',
+      `url(${process.env.PUBLIC_URL || ''}/image.png)`
+    );
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
     let intervalId = null;
 
@@ -108,42 +116,23 @@ function App() {
     };
   }, []);
 
-  const formatTimestamp = (date) => {
-    if (!date) return '';
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  };
-
   return (
     <div className="app">
       <header className="app-header" role="banner">
         <div className="header-content">
           <div className="logo-container">
             <img
-              src="/psu-logo.png"
-              alt="Penn State Logo"
+              src="/logo.jpg"
+              alt="Penn State Abington Logo"
               className="psu-logo"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                const placeholder = e.target.nextElementSibling;
-                if (placeholder) placeholder.style.display = 'flex';
-              }}
             />
-            <div className="logo-placeholder" style={{ display: 'none' }}>
-              PSU
-            </div>
           </div>
-          <h1 className="app-title">Campus Parking Status</h1>
+          <h1 className="app-title">PSUPark – Student Parking Availability</h1>
         </div>
       </header>
 
       <main className="app-main">
         {error && <ErrorBanner message={`Error loading parking data: ${error}`} onClose={() => setError(null)} />}
-
-        <h2 className="main-title">Campus Parking Status</h2>
 
         {loading ? (
           <LoadingSkeleton />
@@ -159,14 +148,30 @@ function App() {
                       key={lot.lot}
                       lot={lot.lot}
                       occupancy={lot.occupancy_pct}
+                      capacity={lot.capacity}
+                      occupiedSpaces={lot.occupied_spaces}
+                      lastUpdated={lastUpdated}
                     />
                   ))}
                 </div>
-                {lastUpdated && (
-                  <div className="timestamp" aria-live="polite">
-                    Last updated: {formatTimestamp(lastUpdated)}
+                <div className="legend-container">
+                  <div className="legend" role="region" aria-label="Parking status color legend">
+                    <div className="legend-item">
+                      <div className="legend-color green" aria-hidden="true"></div>
+                      <span>Open (≤{OCCUPANCY_THRESHOLDS.GREEN_MAX}%)</span>
+                    </div>
+                    <span className="legend-separator" aria-hidden="true">•</span>
+                    <div className="legend-item">
+                      <div className="legend-color yellow" aria-hidden="true"></div>
+                      <span>Busy ({OCCUPANCY_THRESHOLDS.GREEN_MAX + 1}–{OCCUPANCY_THRESHOLDS.YELLOW_MAX}%)</span>
+                    </div>
+                    <span className="legend-separator" aria-hidden="true">•</span>
+                    <div className="legend-item">
+                      <div className="legend-color red" aria-hidden="true"></div>
+                      <span>Full (&gt;{OCCUPANCY_THRESHOLDS.YELLOW_MAX}%)</span>
+                    </div>
                   </div>
-                )}
+                </div>
               </>
             )}
           </>

@@ -32,6 +32,6 @@ ALLOWED_ORIGINS = [
 
 # Server Configuration
 HOST = os.getenv('HOST', '0.0.0.0')
-PORT = int(os.getenv('PORT', 5002))
+PORT = int(os.getenv('PORT', 5099))
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 

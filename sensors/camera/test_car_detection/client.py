@@ -5,7 +5,7 @@ from datetime import datetime
 from ultralytics import YOLO
 
 # Configuration
-BACKEND_URL = "http://localhost:5000/api/parking-lots/C/occupancy"  # Update to your backend endpoint
+BACKEND_URL = "http://localhost:5099/api/parking-lots/C/occupancy"  # Update to your backend endpoint
 CAMERA_INDEX = 0  # Default webcam
 CAPTURE_INTERVAL = 5  # Seconds between captures
 YOLO_MODEL_PATH = "../../yolo11m.pt"  # Medium YOLO model

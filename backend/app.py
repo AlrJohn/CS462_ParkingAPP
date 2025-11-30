@@ -223,6 +223,63 @@ def set_lot_occupancy():
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+@app.route("/uploadLotCount", methods=["POST"])
+@require_api_key
+def upload_lot_count():
+    """Upload parking lot count from rooftop camera (sets total car count directly)."""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+
+        lot = data.get("lot")
+        count = data.get("count")
+
+        # Validate input
+        if not lot or lot not in parking_lots:
+            return jsonify({"error": f"Invalid lot. Must be one of: {list(parking_lots.keys())}"}), 400
+
+        if count is None or not isinstance(count, int):
+            return jsonify({"error": "Invalid count. Must be an integer."}), 400
+
+        if count < 0:
+            return jsonify({"error": "count cannot be negative"}), 400
+
+        capacity = lot_capacities[lot]
+
+        # Ensure count doesn't exceed capacity
+        if count > capacity:
+            count = capacity
+
+        # Set occupied spaces = count
+        occupied_spaces = count
+
+        # Calculate available spaces (capacity - occupied)
+        new_available_spaces = capacity - occupied_spaces
+
+        # Update parking lot
+        parking_lots[lot] = new_available_spaces
+
+        # Save to file
+        save_parking_data()
+
+        # Calculate occupancy percentage
+        occupancy_pct = round((occupied_spaces / capacity) * 100, 1)
+
+        # Return updated lot information
+        return jsonify({
+            "lot": lot,
+            "available_spaces": new_available_spaces,
+            "capacity": capacity,
+            "occupied_spaces": occupied_spaces,
+            "occupancy_pct": occupancy_pct,
+            "message": f"Lot {lot} updated with {count} cars"
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 @app.route("/getLotCount", methods=["GET"])
 @require_api_key
 def get_lot_count():
@@ -269,6 +326,7 @@ if __name__ == "__main__":
     print("Endpoints:")
     print("  POST /updateLotCount - Update lot count (requires API key)")
     print("  POST /setLotOccupancy - Set lot occupancy by count (requires API key)")
+    print("  POST /uploadLotCount - Upload lot count from camera (requires API key)")
     print("  GET /getLotCount - Get all lot data (requires API key)")
     print(f"Server running on {HOST}:{PORT}")
     

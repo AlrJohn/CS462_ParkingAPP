@@ -27,7 +27,7 @@ The app will automatically generate an API key if none is set. Check the console
 python app.py
 ```
 
-The server will start on `http://localhost:5002` by default.
+The server will start on `http://localhost:5099` by default.
 
 ## API Endpoints
 

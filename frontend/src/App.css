@@ -17,7 +17,7 @@ body {
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background-image: var(--bg-image-url);
@@ -26,6 +26,7 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
   position: relative;
+  overflow: hidden;
 }
 
 .app::before {
@@ -86,11 +87,13 @@ body {
 }
 
 .app-main {
-  margin-top: 72px;
-  padding: 20px;
+  padding: 0;
   flex: 1;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .parking-grid {

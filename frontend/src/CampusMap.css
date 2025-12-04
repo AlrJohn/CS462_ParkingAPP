@@ -1,115 +1,232 @@
-/* Note: CSS cannot directly import JS constants, so values here match constants.js */
-/* Colors: Nittany Navy #001E44, Beaver Blue #1E407C, White #FFFFFF, Light Gray #E9EEF3, Text #0B2141 */
+/* Interactive Campus Map Styles */
 
-.campus-map-section {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 30, 68, 0.1);
-  flex: 0 0 400px;
-  min-width: 0;
+body {
+  overflow: hidden;
 }
 
-.map-header {
+.campus-map-full-screen {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  flex-direction: column;
+  height: 100%;
+  background: #f0f0f0;
 }
 
-.map-title {
-  color: #0B2141;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.map-toggle-button {
-  display: none; /* Hidden on desktop */
+.campus-map-header {
   background: #001E44;
   color: #FFFFFF;
-  border: none;
-  border-radius: 4px;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  padding: 12px 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 30, 68, 0.15);
+}
+
+.campus-map-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.campus-map-subtitle {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.map-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.map-toggle-button:hover {
-  background: #1E407C;
-}
-
-.map-toggle-button:focus {
-  outline: 2px solid #001E44;
-  outline-offset: 2px;
-}
-
-.map-content {
+  padding: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.map-content.expanded {
-  max-height: 500px;
-}
-
-.map-content.collapsed {
-  max-height: 0;
-}
-
-.map-container {
+  min-height: 0;
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-  background: #E9EEF3;
-  border-radius: 8px;
-  padding: 20px;
 }
 
-.campus-map-svg {
+.campus-map-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 30, 68, 0.15);
 }
 
-.map-marker {
-  transition: fill 0.3s ease, transform 0.2s ease;
+.zones-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.parking-zone {
+  position: absolute;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 0 0 0 rgba(0, 0, 0, 0.2);
 }
 
-.map-marker:hover {
-  transform: scale(1.2);
+.parking-zone:hover {
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.3), 0 0 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
 }
 
-/* Tablet: Stack layout */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .campus-map-section {
-    flex: 1 1 100%;
-    width: 100%;
-  }
+.parking-zone.hovered {
+  box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.4), 0 0 16px rgba(0, 0, 0, 0.3);
+  transform: scale(1.08);
 }
 
-/* Mobile: Show toggle button and make collapsible */
+/* Tooltip Card */
+.parking-tooltip {
+  position: fixed;
+  transform: translate(0, -50%);
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 30, 68, 0.2);
+  pointer-events: none;
+  min-width: 220px;
+  z-index: 2000;
+  border: 2px solid #1E407C;
+}
+
+.tooltip-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #001E44;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.tooltip-occupancy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.occupancy-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.occupancy-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0B2141;
+}
+
+.occupancy-label {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+}
+
+.tooltip-details {
+  border-top: 1px solid #E9EEF3;
+  padding-top: 10px;
+  font-size: 0.875rem;
+  color: #0B2141;
+}
+
+.tooltip-details p {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.tooltip-details strong {
+  color: #001E44;
+}
+
+/* Legend */
+.map-legend {
+  background: #FFFFFF;
+  padding: 10px 20px;
+  box-shadow: 0 -2px 8px rgba(0, 30, 68, 0.1);
+  border-top: 1px solid #E9EEF3;
+}
+
+.map-legend h4 {
+  margin: 0 0 8px 0;
+  color: #001E44;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.legend-items {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #0B2141;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .campus-map-section {
-    flex: 1 1 100%;
-    width: 100%;
-    margin: 0;
+  .campus-map-full-screen {
+    min-height: 100vh;
   }
 
-  .map-toggle-button {
-    display: flex;
+  .campus-map-title {
+    font-size: 1.5rem;
   }
 
-  .map-content.collapsed {
-    max-height: 0;
+  .campus-map-subtitle {
+    font-size: 0.9rem;
   }
 
-  .map-content.expanded {
-    max-height: 400px;
+  .map-wrapper {
+    padding: 12px;
+  }
+
+  .parking-tooltip {
+    min-width: 180px;
+    padding: 12px;
+  }
+
+  .tooltip-title {
+    font-size: 1.1rem;
+  }
+
+  .occupancy-circle {
+    width: 60px;
+    height: 60px;
+    border-width: 3px;
+  }
+
+  .occupancy-value {
+    font-size: 1.5rem;
+  }
+
+  .legend-items {
+    flex-direction: column;
+    gap: 10px;
   }
 }
+

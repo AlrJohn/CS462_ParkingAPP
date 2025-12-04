@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import ParkingLotCard from './ParkingLotCard';
+import CampusMap from './CampusMap';
 import LoadingSkeleton from './LoadingSkeleton';
 import ErrorBanner from './ErrorBanner';
-import { API_URL, API_HEADERS, REFRESH_INTERVAL, ALLOWED_LOTS, OCCUPANCY_THRESHOLDS } from './constants';
+import { API_URL, API_HEADERS, REFRESH_INTERVAL, ALLOWED_LOTS } from './constants';
 import './App.css';
 
 function App() {
   const [parkingLots, setParkingLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchLots = async () => {
     try {
@@ -76,7 +75,6 @@ function App() {
 
       setParkingLots(lotsArray);
       setError(null);
-      setLastUpdated(new Date());
     } catch (err) {
       setError(err.message || 'Unknown error');
     } finally {
@@ -136,45 +134,10 @@ function App() {
 
         {loading ? (
           <LoadingSkeleton />
+        ) : parkingLots.length === 0 ? (
+          <div className="no-data" role="alert">No parking data available.</div>
         ) : (
-          <>
-            {parkingLots.length === 0 ? (
-              <div className="no-data" role="alert">No parking data available.</div>
-            ) : (
-              <>
-                <div className="parking-grid">
-                  {parkingLots.map((lot) => (
-                    <ParkingLotCard
-                      key={lot.lot}
-                      lot={lot.lot}
-                      occupancy={lot.occupancy_pct}
-                      capacity={lot.capacity}
-                      occupiedSpaces={lot.occupied_spaces}
-                      lastUpdated={lastUpdated}
-                    />
-                  ))}
-                </div>
-                <div className="legend-container">
-                  <div className="legend" role="region" aria-label="Parking status color legend">
-                    <div className="legend-item">
-                      <div className="legend-color green" aria-hidden="true"></div>
-                      <span>Open (≤{OCCUPANCY_THRESHOLDS.GREEN_MAX}%)</span>
-                    </div>
-                    <span className="legend-separator" aria-hidden="true">•</span>
-                    <div className="legend-item">
-                      <div className="legend-color yellow" aria-hidden="true"></div>
-                      <span>Busy ({OCCUPANCY_THRESHOLDS.GREEN_MAX + 1}–{OCCUPANCY_THRESHOLDS.YELLOW_MAX}%)</span>
-                    </div>
-                    <span className="legend-separator" aria-hidden="true">•</span>
-                    <div className="legend-item">
-                      <div className="legend-color red" aria-hidden="true"></div>
-                      <span>Full (&gt;{OCCUPANCY_THRESHOLDS.YELLOW_MAX}%)</span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
+          <CampusMap parkingLots={parkingLots} />
         )}
       </main>
     </div>

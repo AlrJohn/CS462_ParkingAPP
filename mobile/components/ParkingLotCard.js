@@ -1,50 +1,117 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
+import { COLORS, OCCUPANCY_THRESHOLDS } from '../constants';
 
-function ParkingLotCard({ lotName, occupancy }) {
+function ParkingLotCard({ lot, occupancy, capacity, occupiedSpaces, lastUpdated }) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
   const getOccupancyColor = (occupancy) => {
-    if (occupancy >= 90) return '#ef4444';
-    if (occupancy >= 70) return '#f59e0b';
-    return '#22c55e';
+    if (occupancy <= OCCUPANCY_THRESHOLDS.GREEN_MAX) return COLORS.GREEN;
+    if (occupancy <= OCCUPANCY_THRESHOLDS.YELLOW_MAX) return COLORS.YELLOW;
+    return COLORS.RED;
   };
 
+  const formatTimestamp = (date) => {
+    if (!date) return '';
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  };
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1.05,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 3,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 100,
+      friction: 3,
+    }).start();
+  };
+
+  const lotId = lot || 'Unknown';
+  const occupancyValue = Math.round(occupancy || 0);
+  const capacityValue = capacity != null ? capacity : 'N/A';
+  const occupiedValue = occupiedSpaces != null ? occupiedSpaces : 'N/A';
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.lotName}>{lotName}</Text>
-      <View
+    <Pressable
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityLabel={`Student Parking Lot ${lotId}: ${occupancyValue}% occupied, ${occupiedValue} of ${capacityValue} spaces`}
+    >
+      <Animated.View
         style={[
-          styles.occupancyCircle,
-          { borderColor: getOccupancyColor(occupancy) }
+          styles.card,
+          {
+            transform: [{ scale: scaleAnim }],
+          }
         ]}
       >
-        <Text style={styles.occupancyValue}>{occupancy}%</Text>
-      </View>
-      <Text style={styles.occupancyLabel}>OCCUPIED</Text>
-    </View>
+        <Text style={styles.lotName}>Student Parking Lot {lotId}</Text>
+        <View
+          style={[
+            styles.occupancyCircle,
+            { borderColor: getOccupancyColor(occupancyValue) }
+          ]}
+        >
+          <Text style={styles.occupancyValue}>{occupancyValue}%</Text>
+        </View>
+        <Text style={styles.occupancyLabel}>OCCUPIED</Text>
+        <View style={styles.lotDetails}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Capacity:</Text>
+            <Text style={styles.detailValue}>{capacityValue}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Occupied:</Text>
+            <Text style={styles.detailValue}>{occupiedValue}</Text>
+          </View>
+        </View>
+        {lastUpdated && (
+          <Text style={styles.timestamp}>
+            Last updated: {formatTimestamp(lastUpdated)}
+          </Text>
+        )}
+      </Animated.View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 12,
     padding: 24,
-    shadowColor: '#000',
+    shadowColor: '#001E44',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 4,
     alignItems: 'center',
     gap: 16,
     margin: 8,
     minWidth: 160,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   lotName: {
-    color: '#1f2937',
-    fontSize: 18,
+    color: '#0B2141',
+    fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -53,20 +120,49 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 8,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   occupancyValue: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1f2937',
+    color: '#0B2141',
   },
   occupancyLabel: {
-    color: '#6b7280',
-    fontSize: 12,
+    color: '#0B2141',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 1.6,
+  },
+  lotDetails: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 200,
+  },
+  detailLabel: {
+    color: '#0B2141',
+    fontSize: 14,
     fontWeight: '500',
-    letterSpacing: 0.8,
+  },
+  detailValue: {
+    color: '#0B2141',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  timestamp: {
+    color: '#0B2141',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
+    opacity: 0.8,
   },
 });
 

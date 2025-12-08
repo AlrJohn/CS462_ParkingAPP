@@ -58,26 +58,19 @@ class EventHistory:
         self.max_size = 1000
     
     def append(self, timestamp, lot, action, old_value, new_value):
-        """Add new event to the end of the linked list."""
         new_node = EventNode(timestamp, lot, action, old_value, new_value)
         if self.head is None:
             self.head = new_node
+            print(f"[EventHistory] Created first node: {action} for lot {lot} (old: {old_value}, new: {new_value})")
         else:
             current = self.head
             while current.next:
                 current = current.next
             current.next = new_node
-        self.size += 1
-        
-        # Remove oldest event if list exceeds max size
+    # Remove oldest event if list exceeds max size
         if self.size > self.max_size:
             self.remove_oldest()
-    
-    def remove_oldest(self):
-        """Remove the oldest event (first node) from the linked list."""
-        if self.head:
-            self.head = self.head.next
-            self.size -= 1
+            print(f"[EventHistory] Removed oldest event (max size reached). Current size: {self.size}")
     
     def get_recent_events(self, limit=10):
         """Traverse list and return recent events as a list."""

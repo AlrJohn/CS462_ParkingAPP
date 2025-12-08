@@ -36,6 +36,66 @@ def require_api_key(f):
     decorated_function.__name__ = f.__name__
     return decorated_function
 
+# -------------------------------
+# Event History Linked List
+# -------------------------------
+
+class EventNode:
+    """Node for linked list storing parking lot update events."""
+    def __init__(self, timestamp, lot, action, old_value, new_value):
+        self.timestamp = timestamp
+        self.lot = lot
+        self.action = action
+        self.old_value = old_value
+        self.new_value = new_value
+        self.next = None
+
+class EventHistory:
+    """Linked list to track parking lot update events."""
+    def __init__(self):
+        self.head = None
+        self.size = 0
+        self.max_size = 1000
+    
+    def append(self, timestamp, lot, action, old_value, new_value):
+        """Add new event to the end of the linked list."""
+        new_node = EventNode(timestamp, lot, action, old_value, new_value)
+        if self.head is None:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+        self.size += 1
+        
+        # Remove oldest event if list exceeds max size
+        if self.size > self.max_size:
+            self.remove_oldest()
+    
+    def remove_oldest(self):
+        """Remove the oldest event (first node) from the linked list."""
+        if self.head:
+            self.head = self.head.next
+            self.size -= 1
+    
+    def get_recent_events(self, limit=10):
+        """Traverse list and return recent events as a list."""
+        events = []
+        current = self.head
+        count = 0
+        while current and count < limit:
+            events.append({
+                "timestamp": current.timestamp,
+                "lot": current.lot,
+                "action": current.action,
+                "old_value": current.old_value,
+                "new_value": current.new_value
+            })
+            current = current.next
+            count += 1
+        return events
+
 # File path for parking data persistence
 PARKING_DATA_FILE = "parking_data.json"
 
@@ -54,6 +114,9 @@ parking_lots = {
     "J": lot_capacities["J"],
     "M": lot_capacities["M"]
 }
+
+# Initialize event history linked list
+event_history = EventHistory()
 
 # -------------------------------
 # Data Persistence Functions
@@ -136,6 +199,9 @@ def update_lot_count():
         if delta not in [-1, 1]:
             return jsonify({"error": "Delta must be -1 (car entering) or +1 (car exiting)"}), 400
         
+        # Store old value for event history
+        old_spaces = parking_lots[lot]
+        
         # Update available spaces
         current_spaces = parking_lots[lot]
         new_spaces = current_spaces + delta
@@ -148,6 +214,16 @@ def update_lot_count():
             new_spaces = capacity
         
         parking_lots[lot] = new_spaces
+        
+        # Add event to history linked list
+        action = "car_entered" if delta == -1 else "car_exited"
+        event_history.append(
+            timestamp=datetime.now().isoformat(),
+            lot=lot,
+            action=action,
+            old_value=old_spaces,
+            new_value=new_spaces
+        )
         
         # Save to file
         save_parking_data()
@@ -198,11 +274,23 @@ def set_lot_occupancy():
         if occupied_count > capacity:
             occupied_count = capacity
 
+        # Store old value for event history
+        old_spaces = parking_lots[lot]
+
         # Calculate available spaces (capacity - occupied)
         new_available_spaces = capacity - occupied_count
 
         # Update parking lot
         parking_lots[lot] = new_available_spaces
+
+        # Add event to history linked list
+        event_history.append(
+            timestamp=datetime.now().isoformat(),
+            lot=lot,
+            action="occupancy_set",
+            old_value=old_spaces,
+            new_value=new_available_spaces
+        )
 
         # Save to file
         save_parking_data()

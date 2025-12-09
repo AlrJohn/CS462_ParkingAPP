@@ -4,7 +4,7 @@ from datetime import datetime
 from ultralytics import YOLO
 
 # Configuration
-BACKEND_URL = "https://cs462-parkingapp.onrender.com/uploadLotCount" #backend endpoint for uploading lot count
+BACKEND_URL = "https://cs462-parkingapp.onrender.com/setLotOccupancy" #backend endpoint for uploading lot count
 API_KEY = "123"
 YOLO_MODEL_PATH = "../../yolo11m.pt"  # Medium YOLO model
 PARKING_LOT_ID = "M"

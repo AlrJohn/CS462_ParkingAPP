@@ -4,10 +4,10 @@ from datetime import datetime
 from ultralytics import YOLO
 
 # Configuration
-BACKEND_URL = "https://cs462-parkingapp.onrender.com/updateLotCount"
+BACKEND_URL = "https://cs462-parkingapp.onrender.com/uploadLotCount" #backend endpoint for uploading lot count
 API_KEY = "123"
 YOLO_MODEL_PATH = "../../yolo11m.pt"  # Medium YOLO model
-PARKING_LOT_ID = "H"
+PARKING_LOT_ID = "M"
 TEST_IMAGE_PATH = "psu_parking_lot.jpeg"  # Test image in the same directory
 
 # Initialize YOLO model
@@ -78,26 +78,24 @@ def process_test_image():
             if lot_c_data:
                 current_capacity = lot_c_data['capacity']
                 current_occupied = lot_c_data['occupied_spaces']
-                print(f"Current lot C - Capacity: {current_capacity}, Occupied: {current_occupied}")
+                print(f"Current lot {PARKING_LOT_ID} - Capacity: {current_capacity}, Occupied: {current_occupied}")
             else:
                 print(f"Warning: Lot {PARKING_LOT_ID} not found in backend response")
     except Exception as e:
         print(f"Warning: Could not fetch current lot data: {e}")
 
-    # Calculate delta based on detected cars
-    # For camera sensor, we're setting absolute occupancy, but backend uses delta
-    # So we send the detected count as the new occupied count
+    # Calculate count based on detected cars
+    # We then send the detected count as the new occupied count
     print(f"\nSending update to backend...")
     print(f"Detected occupied spots: {car_count}")
 
     # Prepare the data to send to backend
-    # Note: Based on the backend code, we need to use delta (-1 for entering, +1 for exiting)
-    # For a camera-based absolute count, we would need a different endpoint
-    # For now, let's just demonstrate the update with the detection result
+    #uploading the count of cars detected to the given parking lot
+
 
     data = {
         'lot': PARKING_LOT_ID,
-        'delta': -1,  # This is just for demonstration
+        'count': car_count,  # uploading absolute count
         'detected_cars': car_count,  # Adding this for information
         'timestamp': datetime.now().isoformat(),
         'device_id': 'camera_sensor_test'

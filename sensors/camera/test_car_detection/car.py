@@ -5,7 +5,15 @@ Detects cars from images, videos, or webcam feed
 
 from ultralytics import YOLO
 import cv2
+import requests
+from datetime import datetime
 import argparse
+
+
+BACKEND_URL = "https://cs462-parkingapp.onrender.com/updateLotCount" #backend endpoint for uploading lot count
+API_KEY = "123"
+PARKING_LOT_ID = "G"
+TEST_IMAGE_PATH = "psu_parking_lot.jpeg"  # Test image in the same directory
 
 
 def detect_cars(source, model_size='m', conf_threshold=0.3, save_output=False, iou_threshold=0.5):
@@ -39,7 +47,7 @@ def detect_cars(source, model_size='m', conf_threshold=0.3, save_output=False, i
         classes=vehicle_classes,  # Only detect vehicles
         stream=True,  # Use streaming for videos/webcam
         save=save_output,
-        show=True,  # Display results in real-time
+        show=False,  # Disabled for headless systems
         agnostic_nms=False,  # Class-specific NMS better for occluded vehicles
         max_det=300,  # Increase max detections for large parking lots
         augment=True,  # Test-time augmentation for better occlusion handling
@@ -59,12 +67,51 @@ def detect_cars(source, model_size='m', conf_threshold=0.3, save_output=False, i
                 class_name = result.names[cls]
                 print(f"  - {class_name}: {conf:.2f}")
 
-        # Press 'q' to quit (for video/webcam)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    input()
-    cv2.destroyAllWindows()
     print("\nDetection complete!")
+
+    if len(boxes) > 0:
+        val = -1
+    else:
+        val = 1
+
+    car_count = len(boxes)
+    
+    print(f"\nSending update to backend...")
+    print(f"Detected occupied spots: {car_count}")
+
+        # Prepare the data to send to backend
+        #uploading the count of cars detected to the given parking lot
+
+
+    data = {
+            'lot': PARKING_LOT_ID,
+            'delta': val,  # uploading absolute count
+            'detected_cars': car_count,  # Adding this for information
+            'timestamp': datetime.now().isoformat(),
+            'device_id': 'camera_sensor_test'
+    }
+
+    try:
+            # Send POST request to backend with API key
+        headers = {'X-API-Key': API_KEY}
+        response = requests.post(BACKEND_URL, json=data, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            result = response.json()
+            print(f" Successfully updated parking lot {PARKING_LOT_ID}")
+            print(f"Response: {result}")
+            return True
+        else:
+            print(f" Failed to update backend. Status code: {response.status_code}")
+            print(f"Response: {response.text}")
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f" Error sending data to backend: {e}")
+        return False
+
+
+
 
 
 def main():
@@ -84,6 +131,7 @@ def main():
 
     # Convert '0' string to integer for webcam
     source = 0 if args.source == '0' else args.source
+    source = TEST_IMAGE_PATH  # For testing with a sample image
 
     detect_cars(source, args.model, args.conf, args.save, args.iou)
 

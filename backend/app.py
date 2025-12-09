@@ -61,16 +61,25 @@ class EventHistory:
         new_node = EventNode(timestamp, lot, action, old_value, new_value)
         if self.head is None:
             self.head = new_node
+            self.size = 1
             print(f"[EventHistory] Created first node: {action} for lot {lot} (old: {old_value}, new: {new_value})")
         else:
             current = self.head
             while current.next:
                 current = current.next
             current.next = new_node
-    # Remove oldest event if list exceeds max size
+            self.size += 1
+        
+        # Remove oldest event if list exceeds max size
         if self.size > self.max_size:
             self.remove_oldest()
             print(f"[EventHistory] Removed oldest event (max size reached). Current size: {self.size}")
+    
+    def remove_oldest(self):
+        """Remove the oldest (head) event from the list."""
+        if self.head is not None:
+            self.head = self.head.next
+            self.size -= 1
     
     def get_recent_events(self, limit=10):
         """Traverse list and return recent events as a list."""
@@ -330,6 +339,30 @@ def get_lot_count():
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
+@app.route("/getEventHistory", methods=["GET"])
+@require_api_key
+def get_event_history():
+    """Get recent parking lot update events from the event history linked list."""
+    try:
+        limit = request.args.get('limit', default=10, type=int)
+        
+        # Validate limit
+        if limit < 1:
+            limit = 10
+        if limit > 100:
+            limit = 100
+        
+        events = event_history.get_recent_events(limit=limit)
+        
+        return jsonify({
+            "total_size": event_history.size,
+            "max_size": event_history.max_size,
+            "events": events
+        })
+    
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
 
 
 # -------------------------------
@@ -351,8 +384,8 @@ if __name__ == "__main__":
     print("Endpoints:")
     print("  POST /updateLotCount - Update lot count (requires API key)")
     print("  POST /setLotOccupancy - Set lot occupancy by count (requires API key)")
-    #removed uploadLotCount - use setLotOccupancy instead
     print("  GET /getLotCount - Get all lot data (requires API key)")
+    print("  GET /getEventHistory - Get recent parking lot update events (requires API key)")
     print(f"Server running on {HOST}:{PORT}")
     
     app.run(host=HOST, port=PORT, debug=DEBUG)

@@ -19,10 +19,10 @@ const CampusMap = ({ parkingLots }) => {
   // Define parking lot zones with percentage-based coordinates
   // Percentages relative to the 1867x1294 image dimensions
   const parkingZones = [
-    { lotId: 'G', xPercent: (580 / 1867) * 100, yPercent: (230 / 1294) * 100, widthPercent: (280 / 1867) * 100, heightPercent: (250 / 1294) * 100, label: 'Lot G' },
-    { lotId: 'H', xPercent: (1000 / 1867) * 100, yPercent: (800 / 1294) * 100, widthPercent: (250 / 1867) * 100, heightPercent: (200 / 1294) * 100, label: 'Lot H' },
-    { lotId: 'J', xPercent: (340 / 1867) * 100, yPercent: (870 / 1294) * 100, widthPercent: (150 / 1867) * 100, heightPercent: (120 / 1294) * 100, label: 'Lot J' },
-    { lotId: 'M', xPercent: (710 / 1867) * 100, yPercent: (1000 / 1294) * 100, widthPercent: (150 / 1867) * 100, heightPercent: (120 / 1294) * 100, label: 'Lot M' },
+    { lotId: 'G', xPercent: (580 / 1867) * 100, yPercent: ((230 / 1294) * 100) + 10, widthPercent: (280 / 1867) * 100, heightPercent: (250 / 1294) * 100, rotation: 15, label: 'Lot G' },
+    { lotId: 'H', xPercent: (1000 / 1867) * 100, yPercent: ((800 / 1294) * 100) - 5, widthPercent: (250 / 1867) * 100, heightPercent: (200 / 1294) * 100, rotation: 45, label: 'Lot H' },
+    { lotId: 'J', xPercent: ((340 / 1867) * 100) + 2.5, yPercent: ((870 / 1294) * 100) - 15, widthPercent: (150 / 1867) * 100, heightPercent: (120 / 1294) * 100, label: 'Lot J' },
+    { lotId: 'M', xPercent: ((710 / 1867) * 100) + 2.5, yPercent: ((1000 / 1294) * 100) - 10, widthPercent: (150 / 1867) * 100, heightPercent: (120 / 1294) * 100, rotation: -10, label: 'Lot M' },
   ];
 
   const handleZonePress = (zone) => {
@@ -67,6 +67,7 @@ const CampusMap = ({ parkingLots }) => {
                     width: `${zone.widthPercent}%`,
                     height: `${zone.heightPercent}%`,
                     borderColor: getOccupancyColor(occupancy),
+                    transform: zone.rotation ? [{ rotate: `${zone.rotation}deg` }] : [],
                   },
                 ]}
                 onPress={() => handleZonePress(zone)}
